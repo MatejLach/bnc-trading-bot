@@ -10,7 +10,11 @@ import (
 type Bimoney int64
 
 func (m Bimoney) PercentageChange(newVal Bimoney) Bimoney {
-	if strings.HasPrefix(Bimoney((newVal-m)*100000000).FormatBimoney(false), "-") {
+	if m == 0 {
+		return Bimoney(10000000000)
+	}
+
+	if strings.HasPrefix(((newVal - m) * 100000000).FormatBimoney(false), "-") {
 		diff := newVal/100000000 - m/100000000
 		if diff == 0 {
 			return Bimoney(0)
@@ -19,22 +23,35 @@ func (m Bimoney) PercentageChange(newVal Bimoney) Bimoney {
 		interim := diff / (m / 10000000000)
 		return interim * 100000000
 	} else {
-		diff := (newVal - m) * 100000000
+		diff := newVal/100000000 - m/100000000
 		if diff == 0 {
 			return Bimoney(0)
 		}
 
-		interim := diff / m
-		return interim * 100
+		tmp := m / 100
+		interim := (diff * 100000000) / tmp
+		return interim * 100000000
 	}
 }
 
 func (m Bimoney) AmountFromPercentage(percentage Bimoney) Bimoney {
+	if percentage == 0 {
+		return Bimoney(0)
+	}
+
 	interim := m * (percentage / 100000000)
+	if interim == 0 {
+		return Bimoney(0)
+	}
+
 	return interim / 100
 }
 
 func (m Bimoney) PortionOf(value Bimoney) Bimoney {
+	if m == 0 || value == 0 {
+		return Bimoney(0)
+	}
+
 	return m / (value / 100000000)
 }
 

@@ -30,6 +30,18 @@ func TestBimoney_PercentageChange(t *testing.T) {
 			expected:              Bimoney(-3500000000),
 			expectedFmt:           "-35.00000000",
 		},
+		"1 => 49": {
+			inputMoneyStrOriginal: "1",
+			inputMoneyStrNew:      "50",
+			expected:              Bimoney(490000000000),
+			expectedFmt:           "4900.00000000",
+		},
+		"0 => 50": {
+			inputMoneyStrOriginal: "0",
+			inputMoneyStrNew:      "50",
+			expected:              Bimoney(10000000000),
+			expectedFmt:           "100.00000000",
+		},
 	}
 
 	for name, tt := range tests {
