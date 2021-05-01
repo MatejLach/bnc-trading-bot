@@ -14,8 +14,8 @@ import (
 	"github.com/MatejLach/bnc-trading-bot/money"
 )
 
-func (b *Bot) BuyIfDecreaseByPercent(originalPrice string, buyCfg BuyConfig) error {
-	bimOriginalPrice, err := money.ParseBimoney(originalPrice)
+func (b *Bot) BuyIfDecreaseByPercent(symbolPriceChan <-chan string, symbolPriceCloseChan chan<- struct{}, buyCfg BuyConfig) error {
+	bimOriginalPrice, err := money.ParseBimoney(<-symbolPriceChan)
 	if err != nil {
 		return err
 	}
@@ -46,7 +46,7 @@ func (b *Bot) BuyIfDecreaseByPercent(originalPrice string, buyCfg BuyConfig) err
 	}
 
 	log.Printf("Starting with the initial %s price of %s %s, with a purchase target of %s or less, (price decrease of at least %s percentage points), before buying...",
-		buyCfg.BuySymbol, originalPrice, buyCfg.BuyWithHoldingSymbol, buyCfg.TargetPriceToBuyAt, configuredPercentDiff.FormatBimoney(false))
+		buyCfg.BuySymbol, bimOriginalPrice.FormatBimoney(false), buyCfg.BuyWithHoldingSymbol, buyCfg.TargetPriceToBuyAt, configuredPercentDiff.FormatBimoney(false))
 
 	// enforce Binance server time
 	_, err = b.binanceClient.NewSetServerTimeService().Do(context.Background())
@@ -55,12 +55,7 @@ func (b *Bot) BuyIfDecreaseByPercent(originalPrice string, buyCfg BuyConfig) err
 	}
 
 	for {
-		currentPrice, err := b.GetCurrentCryptoPrice(fmt.Sprintf("%s%s", buyCfg.BuySymbol, buyCfg.BuyWithHoldingSymbol))
-		if err != nil {
-			log.Err(err).Msg("sleeping for 5s to try & recover")
-			time.Sleep(5)
-			continue
-		}
+		currentPrice := <-symbolPriceChan
 
 		bimCurrentPrice, err := money.ParseBimoney(currentPrice)
 		if err != nil {
@@ -71,7 +66,7 @@ func (b *Bot) BuyIfDecreaseByPercent(originalPrice string, buyCfg BuyConfig) err
 
 		if currentPercentDiff <= configuredPercentDiff && bimCurrentPrice < bimOriginalPrice {
 			log.Printf("Price decreased from %s to %s, which is a %s percent decrease!",
-				originalPrice, currentPrice, currentPercentDiff.FormatBimoney(false))
+				bimOriginalPrice.FormatBimoney(false), currentPrice, currentPercentDiff.FormatBimoney(false))
 
 			cryptoQtyToBuy, err := money.ParseBimoney(buyCfg.BuyQuantity)
 			if err != nil {
@@ -102,8 +97,7 @@ func (b *Bot) BuyIfDecreaseByPercent(originalPrice string, buyCfg BuyConfig) err
 				return err
 			}
 
-			// TODO: Do we want to continue if there's sufficient funds left to satisfy buyCfg conditions again?
-			bimOriginalPrice = bimCurrentPrice
+			symbolPriceCloseChan <- struct{}{}
 			break
 		}
 	}

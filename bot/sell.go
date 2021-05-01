@@ -14,8 +14,8 @@ import (
 	"github.com/MatejLach/bnc-trading-bot/money"
 )
 
-func (b *Bot) SellIfIncreaseByPercent(originalPrice string, sellCfg SellConfig) error {
-	bimOriginalPrice, err := money.ParseBimoney(originalPrice)
+func (b *Bot) SellIfIncreaseByPercent(symbolPriceChan <-chan string, symbolPriceCloseChan chan<- struct{}, sellCfg SellConfig) error {
+	bimOriginalPrice, err := money.ParseBimoney(<-symbolPriceChan)
 	if err != nil {
 		return err
 	}
@@ -46,7 +46,7 @@ func (b *Bot) SellIfIncreaseByPercent(originalPrice string, sellCfg SellConfig) 
 	}
 
 	log.Printf("Starting with the initial %s price of %s %s, with a sell target of %s or more, (price increase of at least %s percentage points), before selling...",
-		sellCfg.SellHoldingSymbol, originalPrice, sellCfg.SellForSymbol, sellCfg.TargetPriceToSellAt, configuredPercentDiff.FormatBimoney(false))
+		sellCfg.SellHoldingSymbol, bimOriginalPrice.FormatBimoney(false), sellCfg.SellForSymbol, sellCfg.TargetPriceToSellAt, configuredPercentDiff.FormatBimoney(false))
 
 	// enforce Binance server time
 	_, err = b.binanceClient.NewSetServerTimeService().Do(context.Background())
@@ -55,12 +55,7 @@ func (b *Bot) SellIfIncreaseByPercent(originalPrice string, sellCfg SellConfig) 
 	}
 
 	for {
-		currentPrice, err := b.GetCurrentCryptoPrice(fmt.Sprintf("%s%s", sellCfg.SellHoldingSymbol, sellCfg.SellForSymbol))
-		if err != nil {
-			log.Err(err).Msg("sleeping for 5s to try & recover")
-			time.Sleep(5)
-			continue
-		}
+		currentPrice := <-symbolPriceChan
 
 		bimCurrentPrice, err := money.ParseBimoney(currentPrice)
 		if err != nil {
@@ -71,7 +66,7 @@ func (b *Bot) SellIfIncreaseByPercent(originalPrice string, sellCfg SellConfig) 
 
 		if currentPercentDiff >= configuredPercentDiff && bimCurrentPrice > bimOriginalPrice && bimCurrentPrice != bimOriginalPrice {
 			log.Printf("Price increased from %s to %s, which is a %s percent increase!",
-				originalPrice, currentPrice, currentPercentDiff.FormatBimoney(false))
+				bimOriginalPrice.FormatBimoney(false), currentPrice, currentPercentDiff.FormatBimoney(false))
 
 			cryptoQtyToSell, err := money.ParseBimoney(sellCfg.SellQuantityOfHoldings)
 			if err != nil {
@@ -102,8 +97,7 @@ func (b *Bot) SellIfIncreaseByPercent(originalPrice string, sellCfg SellConfig) 
 				return err
 			}
 
-			// TODO: Do we want to continue if there's sufficient funds left to satisfy sellCfg conditions again?
-			bimOriginalPrice = bimCurrentPrice
+			symbolPriceCloseChan <- struct{}{}
 			break
 		}
 	}

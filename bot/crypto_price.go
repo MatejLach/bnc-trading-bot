@@ -1,38 +1,42 @@
 package bot
 
-import (
-	"github.com/adshao/go-binance/v2"
-	"time"
-)
+import "github.com/adshao/go-binance/v2"
 
-func (b *Bot) GetCurrentCryptoPrice(symbol string) (string, error) {
+func (b *Bot) GetCurrentCryptoPrice(symbol string) (<-chan string, chan<- struct{}, error) {
+	currentPriceC := make(chan string)
 	var wsErr error
-	var currentPrice string
+
+	binance.WebsocketKeepalive = true
 
 	eventHandler := func(event *binance.WsMarketStatEvent) {
-		currentPrice = event.LastPrice
+		currentPriceC <- event.LastPrice
 	}
 
 	errHandler := func(err error) {
 		wsErr = err
 	}
 
-	_, stopC, err := binance.WsMarketStatServe(symbol, eventHandler, errHandler)
+	doneC, stopC, err := binance.WsMarketStatServe(symbol, eventHandler, errHandler)
 	if wsErr != nil {
-		return "", wsErr
+		return nil, nil, wsErr
 	}
 
 	if err != nil {
-		return "", err
+		return nil, nil, err
 	}
 
-	for {
-		if currentPrice != "" {
-			stopC <- struct{}{}
-			return currentPrice, nil
-		} else {
-			time.Sleep(1 * time.Second)
-			continue
+	go func() {
+		for {
+			select {
+			case <-doneC:
+				close(currentPriceC)
+				return
+			case <-stopC:
+				close(currentPriceC)
+				return
+			}
 		}
-	}
+	}()
+
+	return currentPriceC, stopC, nil
 }
