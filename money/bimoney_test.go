@@ -18,17 +18,17 @@ func TestBimoney_PercentageChange(t *testing.T) {
 			expected:              Bimoney(5200000000),
 			expectedFmt:           "52.00000000",
 		},
-		"2016 => 49": {
+		"2016 => 48.8": {
 			inputMoneyStrOriginal: "2016",
 			inputMoneyStrNew:      "3000",
-			expected:              Bimoney(4900000000),
-			expectedFmt:           "49.00000000",
+			expected:              Bimoney(4880000000),
+			expectedFmt:           "48.80000000",
 		},
-		"2016 => -35": {
+		"2016 => -35.51": {
 			inputMoneyStrOriginal: "2016",
 			inputMoneyStrNew:      "1300",
-			expected:              Bimoney(-3500000000),
-			expectedFmt:           "-35.00000000",
+			expected:              Bimoney(-3551000000),
+			expectedFmt:           "-35.51000000",
 		},
 		"1 => 49": {
 			inputMoneyStrOriginal: "1",
@@ -41,6 +41,18 @@ func TestBimoney_PercentageChange(t *testing.T) {
 			inputMoneyStrNew:      "50",
 			expected:              Bimoney(10000000000),
 			expectedFmt:           "100.00000000",
+		},
+		"1.56660000 => -85.25": {
+			inputMoneyStrOriginal: "1.56660000",
+			inputMoneyStrNew:      "0.231000000",
+			expected:              Bimoney(-8525000000),
+			expectedFmt:           "-85.25000000",
+		},
+		"0.26660000 => -13.35": {
+			inputMoneyStrOriginal: "0.26660000",
+			inputMoneyStrNew:      "0.231000000",
+			expected:              Bimoney(-1335000000),
+			expectedFmt:           "-13.35000000",
 		},
 	}
 

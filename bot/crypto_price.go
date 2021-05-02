@@ -6,8 +6,6 @@ func (b *Bot) GetCurrentCryptoPrice(symbol string) (<-chan string, chan<- struct
 	currentPriceC := make(chan string)
 	var wsErr error
 
-	binance.WebsocketKeepalive = true
-
 	eventHandler := func(event *binance.WsMarketStatEvent) {
 		currentPriceC <- event.LastPrice
 	}

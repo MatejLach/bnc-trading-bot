@@ -36,12 +36,9 @@ func New() *Bot {
 		log.Fatal(err)
 	}
 
-	client := binance.NewClient(config.APIKey, config.APISecret)
+	binance.WebsocketKeepalive = true
 
-	//serverTime, err := client.NewServerTimeService().Do(context.Background())
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
+	client := binance.NewClient(config.APIKey, config.APISecret)
 
 	httpClient := retryablehttp.NewClient()
 	httpClient.Logger = nil // disable default DEBUG logs
@@ -57,7 +54,7 @@ func New() *Bot {
 
 	client.HTTPClient = httpClient.StandardClient()
 
-	// TODO: Add state keeping
+	// TODO: Add on-disk state keeping
 	sqliteDb, err := sql.Open("sqlite3", "./state.sqlite")
 	if err != nil {
 		log.Fatal(err)

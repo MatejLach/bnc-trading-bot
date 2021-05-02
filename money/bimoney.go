@@ -14,14 +14,18 @@ func (m Bimoney) PercentageChange(newVal Bimoney) Bimoney {
 		return Bimoney(10000000000)
 	}
 
-	if strings.HasPrefix(Bimoney((newVal-m)*100000000).FormatBimoney(false), "-") {
-		diff := newVal/100000000 - m/100000000
+	if strings.HasPrefix(((newVal - m) * 100000000).FormatBimoney(false), "-") {
+		diff := newVal - m
 		if diff == 0 {
 			return Bimoney(0)
 		}
 
-		interim := diff / (m / 10000000000)
-		return interim * 100000000
+		interim := m / 10000
+		if interim == 0 {
+			return Bimoney(0)
+		}
+
+		return (diff / interim) * 1000000
 	} else {
 		diff := (newVal - m) * 100000000
 		if diff == 0 {
