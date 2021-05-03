@@ -70,7 +70,7 @@ func (b *Bot) BuyIfDecreaseByPercent(symbolPriceChan <-chan string, symbolPriceC
 
 			cryptoQtyToBuy, err := money.ParseBimoney(buyCfg.BuyQuantity)
 			if err != nil {
-				return err
+				cryptoQtyToBuy = 0
 			}
 
 			if buyCfg.BuyForPercentOfHoldings != 0 {

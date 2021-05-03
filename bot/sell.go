@@ -70,7 +70,7 @@ func (b *Bot) SellIfIncreaseByPercent(symbolPriceChan <-chan string, symbolPrice
 
 			cryptoQtyToSell, err := money.ParseBimoney(sellCfg.SellQuantityOfHoldings)
 			if err != nil {
-				return err
+				cryptoQtyToSell = 0
 			}
 
 			if sellCfg.SellPercentOfHoldings != 0 {
