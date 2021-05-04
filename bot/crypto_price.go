@@ -1,9 +1,13 @@
 package bot
 
-import "github.com/adshao/go-binance/v2"
+import (
+	"github.com/adshao/go-binance/v2"
+	"time"
+)
 
 func (b *Bot) GetCurrentCryptoPrice(symbol string) (<-chan string, chan<- struct{}, error) {
 	currentPriceC := make(chan string)
+	stopC := make(chan struct{})
 	var wsErr error
 
 	eventHandler := func(event *binance.WsMarketStatEvent) {
@@ -14,7 +18,7 @@ func (b *Bot) GetCurrentCryptoPrice(symbol string) (<-chan string, chan<- struct
 		wsErr = err
 	}
 
-	doneC, stopC, err := binance.WsMarketStatServe(symbol, eventHandler, errHandler)
+	doneC, stopWsC, err := binance.WsMarketStatServe(symbol, eventHandler, errHandler)
 	if wsErr != nil {
 		return nil, nil, wsErr
 	}
@@ -24,13 +28,15 @@ func (b *Bot) GetCurrentCryptoPrice(symbol string) (<-chan string, chan<- struct
 	}
 
 	go func() {
+		defer close(currentPriceC)
+
 		for {
 			select {
 			case <-doneC:
-				close(currentPriceC)
 				return
 			case <-stopC:
-				close(currentPriceC)
+				stopWsC <- struct{}{}
+				time.Sleep(5 * time.Second)
 				return
 			}
 		}
