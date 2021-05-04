@@ -1,8 +1,9 @@
 package bot
 
 import (
-	"github.com/adshao/go-binance/v2"
 	"time"
+
+	"github.com/adshao/go-binance/v2"
 )
 
 func (b *Bot) GetCurrentCryptoPrice(symbol string) (<-chan string, chan<- struct{}, error) {

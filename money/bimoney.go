@@ -171,27 +171,27 @@ func (b Bimoney) FormatBimoney(fitToLot bool) string {
 
 	if fitToLot {
 		pointSplit := strings.Split(bimoneyFmt, ".")
-		roundDirectionN, err := strconv.Atoi(string(pointSplit[1][3]))
+		roundDirectionN, err := strconv.Atoi(string(pointSplit[1][1]))
 		if err != nil {
 			return bimoneyFmt
 		}
 
 		if roundDirectionN >= 5 {
-			roundN, err := strconv.Atoi(string(pointSplit[1][2]))
+			roundN, err := strconv.Atoi(string(pointSplit[1][0]))
 			if err != nil {
 				return bimoneyFmt
 			}
 
 			roundN++
 
-			bimoneyFmt = fmt.Sprintf("%s.%s", pointSplit[0], fmt.Sprintf("%s%d00000", pointSplit[1][:2], roundN))
+			bimoneyFmt = fmt.Sprintf("%s.%s", pointSplit[0], fmt.Sprintf("%s%d00000", pointSplit[1][:0], roundN))
 		} else if roundDirectionN <= 4 {
-			roundN, err := strconv.Atoi(string(pointSplit[1][2]))
+			roundN, err := strconv.Atoi(string(pointSplit[1][0]))
 			if err != nil {
 				return bimoneyFmt
 			}
 
-			bimoneyFmt = fmt.Sprintf("%s.%s", pointSplit[0], fmt.Sprintf("%s%d00000", pointSplit[1][:2], roundN))
+			bimoneyFmt = fmt.Sprintf("%s.%s", pointSplit[0], fmt.Sprintf("%s%d00000", pointSplit[1][:0], roundN))
 		}
 	}
 
