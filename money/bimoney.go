@@ -55,7 +55,7 @@ func (m Bimoney) PortionOf(value Bimoney) Bimoney {
 		return Bimoney(0)
 	}
 
-	return m / (value / 100000000)
+	return m / (value / 10000) * 10000
 }
 
 // ParseBimoney converts a string representation of an integer or a float to Bimoney.

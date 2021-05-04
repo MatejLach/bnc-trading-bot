@@ -132,3 +132,49 @@ func TestBimoney_AmountFromPercentage(t *testing.T) {
 		})
 	}
 }
+
+func TestBimoney_PortionOf(t *testing.T) {
+	tests := map[string]struct {
+		balanceMoneyStr         string
+		currentPriceForWholeStr string
+		expected                Bimoney
+		expectedFmt             string
+	}{
+		"350 as a portion of 0.1501": {
+			balanceMoneyStr:         "350",
+			currentPriceForWholeStr: "0.15010000",
+			expected:                Bimoney(233177880000),
+			expectedFmt:             "2331.77880000",
+		},
+		"150 as a portion of 500": {
+			balanceMoneyStr:         "150",
+			currentPriceForWholeStr: "500",
+			expected:                Bimoney(30000000),
+			expectedFmt:             "0.30000000",
+		},
+	}
+
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			balanceMoney, err := ParseBimoney(tt.balanceMoneyStr)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			currentPriceForWhole, err := ParseBimoney(tt.currentPriceForWholeStr)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			got := balanceMoney.PortionOf(currentPriceForWhole)
+
+			if tt.expected != got {
+				t.Fatalf("expected: %d, got: %d", tt.expected, got)
+			}
+
+			if tt.expectedFmt != got.FormatBimoney(false) {
+				t.Fatalf("expected: %s, got: %s", tt.expectedFmt, got.FormatBimoney(false))
+			}
+		})
+	}
+}
