@@ -57,6 +57,10 @@ func (b *Bot) BuyIfDecreaseByPercent(symbolPriceChan <-chan string, symbolPriceC
 	for {
 		currentPrice := <-symbolPriceChan
 
+		if currentPrice == "" {
+			return fmt.Errorf("stopping execution of purchase order for %s%s, cannot get current price", buyCfg.BuySymbol, buyCfg.BuyWithHoldingSymbol)
+		}
+
 		bimCurrentPrice, err := money.ParseBimoney(currentPrice)
 		if err != nil {
 			return err

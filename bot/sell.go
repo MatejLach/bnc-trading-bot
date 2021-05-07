@@ -57,6 +57,10 @@ func (b *Bot) SellIfIncreaseByPercent(symbolPriceChan <-chan string, symbolPrice
 	for {
 		currentPrice := <-symbolPriceChan
 
+		if currentPrice == "" {
+			return fmt.Errorf("stopping execution of sell order for %s%s, cannot get current price", sellCfg.SellHoldingSymbol, sellCfg.SellForSymbol)
+		}
+
 		bimCurrentPrice, err := money.ParseBimoney(currentPrice)
 		if err != nil {
 			return err
