@@ -9,10 +9,13 @@ import (
 func (b *Bot) GetCurrentCryptoPrice(symbol string) (<-chan string, chan<- struct{}, error) {
 	currentPriceC := make(chan string)
 	stopC := make(chan struct{})
+	var done bool
 	var wsErr error
 
 	eventHandler := func(event *binance.WsMarketStatEvent) {
-		currentPriceC <- event.LastPrice
+		if !done {
+			currentPriceC <- event.LastPrice
+		}
 	}
 
 	errHandler := func(err error) {
@@ -34,10 +37,13 @@ func (b *Bot) GetCurrentCryptoPrice(symbol string) (<-chan string, chan<- struct
 		for {
 			select {
 			case <-doneC:
+				time.Sleep(5 * time.Second)
+				done = true
 				return
 			case <-stopC:
 				stopWsC <- struct{}{}
 				time.Sleep(5 * time.Second)
+				done = true
 				return
 			}
 		}
