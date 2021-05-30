@@ -4,7 +4,7 @@ bnc-trading-bot
 
 [![License: GPL v3](https://img.shields.io/badge/GPLv3-Free%20as%20in%20freedom-blue)](LICENSE)
 
-> [Download the latest release for your OS](https://github.com/MatejLach/bnc-trading-bot/releases/tag/v0.1)
+> [Download the latest release for your OS](https://github.com/MatejLach/bnc-trading-bot/releases/tag/v0.1.1)
 
 This bot automatically trades crypto / fiat assets on [Binance.com](https://www.binance.com/en) according to simple, configurable rules.
 It allows you to buy crypto assets when they go down in value by a configurable percentage/at an exact price & sell when they're up, automatically.
