@@ -28,7 +28,7 @@ Configuration
 
 Upon first launch, a new `config.json` configuration file will be created that looks something like the following, (excluding the explanatory comments):
 
-```
+```javascript
 {
     "api_key": "<YOUR-BINANCE-API-KEY>", // replace everything between " " with your personal Binance.com API key
     "api_secret": "<YOUR-BINANCE-API-SECRET>", // replace everything between " " with your personal Binance.com API secret
